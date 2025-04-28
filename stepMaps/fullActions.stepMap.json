@@ -1,0 +1,70 @@
+{
+  "User interacts with all UI elements": [
+    {
+      "action": "openUrl",
+      "selectorName": "homepage",
+      "selector": "#homepage",
+      "note": "/"
+    },
+    {
+      "action": "setText",
+      "selectorName": "usernameInput",
+      "selector": "#usernameInput",
+      "note": "tomsmith"
+    },
+    {
+      "action": "setText",
+      "selectorName": "passwordInput",
+      "selector": "#passwordInput",
+      "note": "SuperSecretPassword!"
+    },
+    {
+      "action": "click",
+      "selectorName": "loginButton",
+      "selector": "#loginButton",
+      "note": ""
+    },
+    {
+      "action": "assertText",
+      "selectorName": "welcomeMessage",
+      "selector": "#welcomeMessage",
+      "note": "Welcome Tom!"
+    },
+    {
+      "action": "hover",
+      "selectorName": "userAvatar",
+      "selector": "#userAvatar",
+      "note": ""
+    },
+    {
+      "action": "doubleClick",
+      "selectorName": "editProfileBtn",
+      "selector": "#editProfileBtn",
+      "note": ""
+    },
+    {
+      "action": "selectDropdown",
+      "selectorName": "countryDropdown",
+      "selector": "#countryDropdown",
+      "note": "India"
+    },
+    {
+      "action": "uploadFile",
+      "selectorName": "resumeUpload",
+      "selector": "#resumeUpload",
+      "note": "resume.pdf"
+    },
+    {
+      "action": "scrollTo",
+      "selectorName": "footerSection",
+      "selector": "#footerSection",
+      "note": ""
+    },
+    {
+      "action": "assertVisible",
+      "selectorName": "logoutBtn",
+      "selector": "#logoutBtn",
+      "note": ""
+    }
+  ]
+}
