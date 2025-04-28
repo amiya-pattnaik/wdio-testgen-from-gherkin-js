@@ -6,4 +6,6 @@ test/reports/*
 package-lock.json
 allure-report/*
 allure-results/*
-logs/*
+logs/
+test/
+stepMaps/

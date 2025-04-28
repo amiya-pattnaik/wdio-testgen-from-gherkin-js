@@ -12,7 +12,6 @@ Automatically generate WebdriverIO **Page Object classes** and **Mocha test spec
 2. Generate Tests: Uses the .stepMap.json to generate:
     - WebdriverIO-compatible Page Object Model (POM) classes.
     - Mocha-based test specs.
-
 ---
 
 ### 📌 Why Use This Tool?
@@ -25,7 +24,7 @@ Automatically generate WebdriverIO **Page Object classes** and **Mocha test spec
 
 ---
 
-### Requirements
+### 🛠️ Requirements
 - Node.js
 - WebdriverIO 8+
 - Install dependencies: `npm install`
@@ -33,7 +32,18 @@ Automatically generate WebdriverIO **Page Object classes** and **Mocha test spec
 ---
 
 ### 🛠️ How It Works
-### ✅ Step 1: Gherkin to stepMap
+The process follows a two-step automation:
+
+### ✅ Step 1: Gherkin to stepMap (Generate stepMap.json Files)
+
+Generate stepMap.json Files:
+- Parses .feature files written in Gherkin syntax.
+- Extracts scenarios and steps.
+- Produces a structured .stepMap.json file containing:
+  - action to perform (e.g., click, setText, assertVisible)
+  - selectorName for logical mapping
+  - selector for the DOM element
+  - note for values or assertion
 
 Run the generator to generate stepMap JSON:
 ``npm run generate:stepmap``
@@ -89,10 +99,14 @@ Translates into stepMaps/login.stepMap.json:
   ]
 }
 ```
-> Note: Once your JSON file is generated make sure to update the correct selector from your application. This is your baseline and based on this information your pageobjects and test specs will be generated. Review the generated code and modify if needed or based on your requirements.
+> Please ensure that after generating your JSON file, you update the appropriate selector for the DOM element in your application. This serves as your baseline, and your page objects and test specifications will be created based on this information. It is advisable to review the generated code and make any necessary modifications according to your requirements. You are permitted to have multiple Gherkin feature files under features Directory, each containing any number of scenarios.
 
+### ✅ Step 2: stepMap to Code (Generate WebdriverIO Code)
 
-### ✅ Step 2: stepMap to Code
+Uses stepMap.json to generate:
+- Page Object classes (pageobjects/)
+- Mocha test specs (tests/)
+- Leverages a base Page class with shared methods and browser.url() setup.
 
 Run the generator to generate pageobjects and specs:
 ``npm run generate:tests``
@@ -107,7 +121,7 @@ project-root/
 ├── stepMaps/               # Generated step maps (JSON)
 ├── test/
 │   ├── pageobjects/        # Generated Page Object classes
-│   └── specs/               # Generated test specs
+│   └── specs/              # Generated test specs
 ├── generateStepMap.js      # StepMap generator script
 ├── generateTestsFromMap.js # PageObject + test spec generator script
 └── README.md
@@ -134,14 +148,14 @@ project-root/
 | assertUrlContains | Checks partial match on URL     |
 | waitForVisible    | Waits until element is visible    |
 
-> Note: Unrecognized actions are commented out in the generated code for review. If you want to add any additional action pease refer to the source code and add required actions. it is super easy!
+> Please be advised that any unrecognized actions have been commented out in the generated code for your review. Should you wish to include any additional actions, kindly refer to the source code and incorporate the necessary actions, which is quite straightforward. You may utilize any WebdriverIO commands as needed.
 
 ---
 
 ### 🚀 Example Output
 
-Base Page Class: page.js
-```
+Leverages a base Page class with shared methods and browser.url() setup.
+```JS
 const { browser } = require('@wdio/globals');
 
 /**
@@ -159,8 +173,8 @@ module.exports = class Page {
 };
 ```
 
-Page Object
-```
+Page Specific PageObject
+```JS
 const Page = require('./page');
 
 /**
@@ -191,7 +205,7 @@ module.exports = new LoginPage();
 ```
 Mocha Test
 
-```
+```JS
 const { expect } = require('@wdio/globals');
 const login = require('../pageobjects/login.page');
 
