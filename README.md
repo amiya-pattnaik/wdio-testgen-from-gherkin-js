@@ -216,6 +216,7 @@ describe('login', () => {
   });
 });
 ```
+> Although it automates over 90% of the code, it is recommended to review the generated code and make any necessary adjustments to meet your specific requirements, such as organizing page-specific methods, importing test data from external files, and invoking methods from your specification files, among others.
 ---
 ### Test execution
 
