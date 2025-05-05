@@ -49,14 +49,15 @@ exports.config = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
-    capabilities: [
-      { browserName: 'chrome'
-          // 'goog:chromeOptions': {
-          // args: ['headless', 'disable-gpu']
-      },
-
-      // { browserName: 'safari'},
-    ],
+    capabilities: [{
+        browserName: 'chrome'
+    }, {
+        // browserName: 'firefox'
+    }, {
+        browserName: 'safari'
+    }, {
+        // browserName: 'MicrosoftEdge'
+    }],
 
     //
     // ===================
@@ -65,7 +66,7 @@ exports.config = {
     // Define all options that are relevant for the WebdriverIO instance here
     //
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    logLevel: 'trace',
+    logLevel: 'info',
     //
     // Set specific log levels per logger
     // loggers:
@@ -128,12 +129,7 @@ exports.config = {
     // Test reporter for stdout.
     // The only one supported by default is 'dot'
     // see also: https://webdriver.io/docs/dot-reporter
-    reporters:  ['spec',['allure',{
-                    outputDir: 'allure-results',
-                    disableWebdriverStepsReporting: true,
-                    disableWebdriverScreenshotsReporting: true,
-                  }]
-                ],
+    reporters: ['spec','junit',['allure', {outputDir: 'allure-results'}]],
 
     // Options to be passed to Mocha.
     // See the full list at http://mochajs.org/
@@ -141,7 +137,6 @@ exports.config = {
         ui: 'bdd',
         timeout: 60000
     },
-
     //
     // =====
     // Hooks

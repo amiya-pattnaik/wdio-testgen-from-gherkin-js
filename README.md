@@ -117,7 +117,7 @@ Output:
 📂 Directory Structure
 ```
 project-root/
-├── features/               # Gherkin feature files
+├── features/               # Input Gherkin feature files
 ├── stepMaps/               # Generated step maps (JSON)
 ├── test/
 │   ├── pageobjects/        # Generated Page Object classes
