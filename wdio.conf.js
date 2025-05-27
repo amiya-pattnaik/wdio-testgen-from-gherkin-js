@@ -49,15 +49,12 @@ exports.config = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
-    capabilities: [{
-        browserName: 'chrome'
-    }, {
-        // browserName: 'firefox'
-    }, {
-        browserName: 'safari'
-    }, {
-        // browserName: 'MicrosoftEdge'
-    }],
+    capabilities: [
+      { browserName: 'chrome'},
+      // { browserName: 'firefox'},
+      // { browserName: 'safari' },
+      // { browserName: 'MicrosoftEdge'}
+    ],
 
     //
     // ===================

@@ -4,8 +4,8 @@ node_modules/
 npm-debug.log
 test/reports/*
 package-lock.json
-allure-report/*
-allure-results/*
+allure-report/
+allure-results/
 logs/
 test/
 stepMaps/

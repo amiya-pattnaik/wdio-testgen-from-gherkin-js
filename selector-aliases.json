@@ -1,0 +1,6 @@
+{
+  "_comment": "This will override fallbackSelector for matching selectorName...",
+  "userNameField": "#login-username-amiya",
+  "passwordField": "#login-password-Patt",
+  "loginButton": "button.login-btn"
+}

@@ -1,6 +1,6 @@
 {
-  "name": "gherkin-to-webdriverIO-test-generator",
-  "version": "1.0.0",
+  "name": "wdio-testgen-from-gherkin-js",
+  "version": "1.0.1",
   "description": "Automatically generate WebdriverIO Page Object classes and Mocha test specs from Gherkin",
   "author": "Amiya Pattanaik <pattnaik_amiya@yahoo.com>",
   "license": "MIT",
@@ -15,13 +15,16 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/amiya-pattnaik/gherkin-to-webdriverIO-test-generator.git"
+    "url": "https://github.com/amiya-pattnaik/wdio-testgen-from-gherkin-js"
   },
-  "homepage": "https://github.com/amiya-pattnaik/gherkin-to-webdriverIO-test-generator.git",
+  "homepage": "https://github.com/amiya-pattnaik/wdio-testgen-from-gherkin-js",
   "scripts": {
-    "allure:report": "node_modules/.bin/allure generate --clean allure-results && allure open -p 5050",
-    "generate:stepmap": "node generateStepMap.js",
-    "generate:tests": "node generateTestsFromMap.js",
+    "testgen:steps": "node testgen.js steps",
+    "testgen:tests": "node testgen.js tests",
+    "testgen:run": "node testgen.js run",
+    "allure:generate": "npx allure generate --clean allure-results",
+    "allure:open": "npx allure open -p 5050",
+    "allure:report": "npm run allure:generate && npm run allure:open",
     "test:local": "npx wdio run wdio.conf.js",
     "wdio": "wdio run ./wdio.conf.js"
   },
@@ -29,6 +32,7 @@
     "@cucumber/gherkin": "^26.0.2",
     "@cucumber/messages": "^22.0.0",
     "allure-commandline": "^2.34.0",
+    "compromise": "^14.14.4",
     "fs-extra": "^11.1.1"
   },
   "devDependencies": {
@@ -44,6 +48,8 @@
     "@wdio/sauce-service": "^9.12.7",
     "@wdio/spec-reporter": "^9.12.6",
     "@wdio/visual-service": "^7.0.0",
+    "chokidar": "^4.0.3",
+    "commander": "^14.0.0",
     "wdio-gmail-service": "^2.1.0",
     "wdio-lambdatest-service": "^4.0.0",
     "wdio-wait-for": "^3.1.0"
