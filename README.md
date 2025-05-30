@@ -199,35 +199,37 @@ Feature: Login
 
 ### Generated: `test/pageobjects/page.js`
 ```js
-import { browser, $ } from '@wdio/globals';
+iconst { browser, $ } = require('@wdio/globals');
 
-export default class Page {
-  open(path: string) {
-    return browser.url(`https://the-internet.herokuapp.com/${path}`);
+class Page {
+  open(path) {
+    return browser.url(`https://the-internet.herokuapp.com/[object Object]`);
   }
 
-  async trySelector(primarySelector: string, fallbackSelectors: string[]) {
+  async trySelector(primary, fallbacks) {
     try {
-      const primary = await $(primarySelector);
-      if (await primary.isExisting() && await primary.isDisplayed()) {
-        console.log(`✅ Using primary selector: ${primarySelector}`);
-        return primary;
+      const el = await $(primary);
+      if (await el.isExisting() && await el.isDisplayed()) {
+        console.log(`✅ Using primary selector: ${primary}`);
+        return el;
       }
     } catch (e) {
-      console.warn(`⚠️ Failed to find element with primary selector: ${primarySelector}`);
+      console.warn(`⚠️ Failed to find element with primary selector: ${primary}`);
     }
-    for (const selector of fallbackSelectors) {
+    for (const sel of fallbacks) {
       try {
-        const alt = await $(selector);
-        if (await alt.isExisting() && await alt.isDisplayed()) {
-          console.log(`↪️ Using fallback selector: ${selector}`);
-          return alt;
+        const fallback = await $(sel);
+        if (await fallback.isExisting() && await fallback.isDisplayed()) {
+          console.log(`↪️ Using fallback selector: ${sel}`);
+          return fallback;
         }
-      } catch (e) {}
+      } catch {}
     }
-    throw new Error(`❌ All selectors failed:\nPrimary: ${primarySelector}\nFallbacks: ${fallbackSelectors.join(', ')}`);
+    throw new Error(`❌ All selectors failed:\nPrimary: ${primary}\nFallbacks: ${fallbacks.join(', ')}`);
   }
 }
+
+module.exports = Page;
 ```
 
 ### Generated: `test/pageobjects/login.page.js`

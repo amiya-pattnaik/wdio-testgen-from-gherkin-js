@@ -1,3 +1,7 @@
+// Sample config to help run generated specs locally
+// You can modify this to match your project setup
+
+
 exports.config = {
     //
     // ====================
