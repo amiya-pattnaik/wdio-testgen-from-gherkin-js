@@ -43,6 +43,7 @@
     "@cucumber/gherkin": "^26.0.2",
     "@cucumber/messages": "^22.0.0",
     "allure-commandline": "^2.34.0",
+    "chokidar": "^4.0.3",
     "commander": "^14.0.0",
     "compromise": "^14.14.4",
     "fs-extra": "^11.1.1"
