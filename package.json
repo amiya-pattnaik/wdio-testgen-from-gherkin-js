@@ -1,6 +1,6 @@
 {
   "name": "wdio-testgen-from-gherkin-js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Automatically generate WebdriverIO Page Object classes and Mocha test specs from Gherkin",
   "author": "Amiya Pattanaik <pattnaik_amiya@yahoo.com>",
   "license": "MIT",
