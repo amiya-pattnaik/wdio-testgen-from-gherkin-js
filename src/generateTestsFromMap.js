@@ -4,8 +4,10 @@ const chokidar = require('chokidar');
 const { generateShortName, buildActionLine } = require('./utils');
 const { stepMapDir, pageObjectDir, specDir, basePagePath } = require('./config');
 
-function ensureBasePageClass() {
-  if (!fs.existsSync(basePagePath)) {
+function ensureBasePageClass(outputDir) {
+  const baseClassPath = path.resolve(outputDir, 'pageobjects/page.js');
+
+  if (!fs.existsSync(baseClassPath)) {
     const content = `const { browser, $ } = require('@wdio/globals');
 
 class Page {
@@ -32,15 +34,18 @@ class Page {
         }
       } catch {}
     }
-    throw new Error(\`❌ All selectors failed:\nPrimary: \${primary}\nFallbacks: \${fallbacks.join(', ')}\`);
+    throw new Error(\`❌ All selectors failed:\\nPrimary: \${primary}\\nFallbacks: \${fallbacks.join(', ')}\`);
   }
 }
 
 module.exports = Page;`;
-    fs.writeFileSync(basePagePath, content, 'utf-8');
+
+    fs.mkdirSync(path.dirname(baseClassPath), { recursive: true });
+    fs.writeFileSync(baseClassPath, content, 'utf-8');
     console.log('✅ Created base Page class with open() and trySelector()');
   }
 }
+
 
 function extractPathSegment(stepMap, fallback) {
   for (const steps of Object.values(stepMap)) {
@@ -198,7 +203,9 @@ function generateTestSpecs({ stepMapDir: userDir, outputDir = '', dryRun = false
   if (!fs.existsSync(resolvedPageObjectDir)) fs.mkdirSync(resolvedPageObjectDir, { recursive: true });
   if (!fs.existsSync(resolvedSpecDir)) fs.mkdirSync(resolvedSpecDir, { recursive: true });
 
-  ensureBasePageClass(); // Generates page.js once if needed
+  // ensureBasePageClass(); // Generates page.js once if needed
+  ensureBasePageClass(outputDir || path.resolve(__dirname, '../'));
+
 
   const files = fs.readdirSync(targetDir).filter(f => f.endsWith('.stepMap.json'));
 
