@@ -113,8 +113,46 @@ testgen run --report-only   # ⬅️ Generate report without rerunning testsbash
 >   "allure:open": "allure open -p 5050",
 >   "allure:report": "npm run allure:generate && npm run allure:open"
 > }
-> ```
+>```
 
+## Option C: Using as a Node.js Module
+
+You can use `wdio-testgen-from-gherkin-js` package both as a CLI tool and as a Node.js module in custom scripts.
+
+In your project workking directory like any other NPM modules install this package as `npm install wdio-testgen-from-gherkin-js`
+
+Example: generate-tests.js
+
+```js
+const { generateStepMaps, generateTestSpecs } = require('wdio-testgen-from-gherkin-js');
+
+// Generate stepMap JSON files from .feature files
+generateStepMaps({
+  featuresPath: './features',      // path to your .feature files. Make sure features folder exist and has .feature files
+  outputPath: './stepMaps',        // where to write stepMap JSONs
+  watch: false,
+  force: true
+});
+
+// Generate Page Object classes and Mocha test specs
+generateTestSpecs({
+  stepMapDir: './stepMaps',        // location of generated stepMaps
+  outputDir: './test',             // base directory to create pageobjects/ and specs/
+  dryRun: false,
+  watch: false
+});
+
+```
+#### Output Structure:
+
+```
+test/
+├── pageobjects/
+│   └── login.page.js
+└── specs/
+    └── login.spec.js
+
+```
 ---
 
 ## ⚙️ Available Commands & Flags

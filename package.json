@@ -11,6 +11,7 @@
   },
   "files": [
     "testgen.js",
+    "index.js",
     "src/",
     "features/",
     "babel.config.js",

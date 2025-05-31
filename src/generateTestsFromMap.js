@@ -1,5 +1,3 @@
-// stepMapJson-to-page/spec generator logic
-
 const fs = require('fs');
 const path = require('path');
 const chokidar = require('chokidar');
@@ -12,7 +10,7 @@ function ensureBasePageClass() {
 
 class Page {
   open(path) {
-    return browser.url(` + '`' + `https://the-internet.herokuapp.com/${path}` + '`' + `);
+    return browser.url(\`https://the-internet.herokuapp.com/\${path}\`);
   }
 
   async trySelector(primary, fallbacks) {
@@ -59,7 +57,7 @@ function extractPathSegment(stepMap, fallback) {
   return fallback.toLowerCase().replace(/\s+/g, '-');
 }
 
-function generateCodeFromStepMap(file, stepMap, opts) {
+function generateCodeFromStepMap(file, stepMap, opts = {}) {
   const baseName = path.basename(file, '.stepMap.json');
   const pageClassName = `${baseName.charAt(0).toUpperCase()}${baseName.slice(1)}Page`;
   const usedSelectors = new Map();
@@ -109,7 +107,7 @@ function generateCodeFromStepMap(file, stepMap, opts) {
   pageLines.push('  }');
   pageLines.push('}');
   pageLines.push(`module.exports = new ${pageClassName}();`);
-  fs.writeFileSync(path.join(pageObjectDir, `${baseName}.page.js`), pageLines.join('\n'), 'utf-8');
+  fs.writeFileSync(path.join(opts.pageObjectDir, `${baseName}.page.js`), pageLines.join('\n'), 'utf-8');
 
   const testLines = [
     `const { expect } = require('@wdio/globals');`,
@@ -132,13 +130,14 @@ function generateCodeFromStepMap(file, stepMap, opts) {
   }
 
   testLines.push('});');
-  fs.writeFileSync(path.join(specDir, `${baseName}.spec.js`), testLines.join('\n'), 'utf-8');
+  fs.writeFileSync(path.join(opts.specDir, `${baseName}.spec.js`), testLines.join('\n'), 'utf-8');
 
   if (!opts.dryRun) {
     console.log(`✅ Generated: ${baseName}.page.js + ${baseName}.spec.js`);
   } else {
-    console.log(`[dry-run] Would write: ${path.join(pageObjectDir, `${baseName}.page.js`)}`);
-    console.log(`[dry-run] Would write: ${path.join(specDir, `${baseName}.spec.js`)}`);
+    console.log(`[dry-run] Would write: ${path.join(opts.pageObjectDir, `${baseName}.page.js`)}`);
+    console.log(`[dry-run] Would write: ${path.join(opts.specDir, `${baseName}.spec.js`)}`);
+
   }
 }
 
@@ -164,7 +163,12 @@ function processTests(opts) {
       return;
     }
     const stepMap = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
-    generateCodeFromStepMap(file, stepMap, opts);
+    generateCodeFromStepMap(file, stepMap, {
+      ...opts,
+      pageObjectDir,
+      specDir
+    });
+
   });
 
   if (opts.watch) {
@@ -178,4 +182,54 @@ function processTests(opts) {
   }
 }
 
-module.exports = { processTests };
+function generateTestSpecs({ stepMapDir: userDir, outputDir = '', dryRun = false, watch = false }) {
+  const targetDir = userDir || stepMapDir;
+
+  // If outputDir is provided, override defaults
+  const resolvedPageObjectDir = outputDir
+    ? path.resolve(outputDir, 'pageobjects')
+    : pageObjectDir;
+
+  const resolvedSpecDir = outputDir
+    ? path.resolve(outputDir, 'specs')
+    : specDir;
+
+  // Ensure folders
+  if (!fs.existsSync(resolvedPageObjectDir)) fs.mkdirSync(resolvedPageObjectDir, { recursive: true });
+  if (!fs.existsSync(resolvedSpecDir)) fs.mkdirSync(resolvedSpecDir, { recursive: true });
+
+  ensureBasePageClass(); // Generates page.js once if needed
+
+  const files = fs.readdirSync(targetDir).filter(f => f.endsWith('.stepMap.json'));
+
+  for (const file of files) {
+    const fullPath = path.join(targetDir, file);
+    const stepMap = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
+
+    generateCodeFromStepMap(file, stepMap, {
+      dryRun,
+      pageObjectDir: resolvedPageObjectDir,
+      specDir: resolvedSpecDir
+    });
+  }
+
+  if (watch) {
+    chokidar.watch(targetDir, { ignoreInitial: true }).on('all', (event, filepath) => {
+      if (filepath.endsWith('.stepMap.json')) {
+        const stepMap = JSON.parse(fs.readFileSync(filepath, 'utf-8'));
+        generateCodeFromStepMap(path.basename(filepath), stepMap, {
+          dryRun,
+          pageObjectDir: resolvedPageObjectDir,
+          specDir: resolvedSpecDir
+        });
+      }
+    });
+    console.log('👀 Watching for step map changes...');
+  }
+}
+
+
+module.exports = {
+  processTests,        // CLI use
+  generateTestSpecs    // Programmatic use
+};

@@ -1,5 +1,3 @@
-// Feature-to-stepMap JSON genaration logic
-
 const fs = require('fs');
 const path = require('path');
 const chokidar = require('chokidar');
@@ -76,7 +74,7 @@ function inferActionAndSelector(stepText) {
   return { action, selectorName, selector, fallbackSelector, note };
 }
 
-function generateStepMap(featurePath, opts) {
+function generateStepMap(featurePath, opts = {}) {
   const content = fs.readFileSync(featurePath, 'utf-8');
   const gherkinDocument = parser.parse(content);
   const feature = gherkinDocument.feature;
@@ -95,7 +93,7 @@ function generateStepMap(featurePath, opts) {
     }
   }
 
-  const outPath = path.join(stepMapDir, `${featureName}.stepMap.json`);
+  const outPath = path.join(opts.outputPath || stepMapDir, `${featureName}.stepMap.json`);
   if (!opts.force && fs.existsSync(outPath)) {
     console.warn(`⚠️ Skipping ${featureName} (already exists)`);
     return;
@@ -105,6 +103,7 @@ function generateStepMap(featurePath, opts) {
   console.log(`✅ Generated step map: ${featureName}.stepMap.json`);
 }
 
+// 🔁 CLI-compatible wrapper (no change)
 function processSteps(opts) {
   if (!fs.existsSync(stepMapDir)) fs.mkdirSync(stepMapDir, { recursive: true });
 
@@ -122,7 +121,7 @@ function processSteps(opts) {
     if (!fs.existsSync(fullPath)) {
       console.warn(`⚠️ File not found: ${file}`);
     } else {
-      generateStepMap(fullPath, opts);
+      generateStepMap(fullPath, { force: opts.force });
     }
   });
 
@@ -130,11 +129,36 @@ function processSteps(opts) {
     chokidar.watch(featureDir, { ignoreInitial: true }).on('all', (event, filepath) => {
       if (filepath.endsWith('.feature')) {
         console.log(`🔁 Detected change: ${event} - ${filepath}`);
-        generateStepMap(filepath, { ...opts, force: true });
+        generateStepMap(filepath, { force: true });
       }
     });
     console.log('👀 Watching for feature changes...');
   }
 }
 
-module.exports = { processSteps };
+// ✅ Programmatic version
+function generateStepMaps({ featuresPath = featureDir, outputPath = stepMapDir, force = true, watch = false }) {
+  if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath, { recursive: true });
+
+  const files = fs.readdirSync(featuresPath).filter(f => f.endsWith('.feature'));
+
+  for (const file of files) {
+    const fullPath = path.join(featuresPath, file);
+    generateStepMap(fullPath, { outputPath, force });
+  }
+
+  if (watch) {
+    chokidar.watch(featuresPath, { ignoreInitial: true }).on('all', (event, filepath) => {
+      if (filepath.endsWith('.feature')) {
+        console.log(`🔁 Detected change: ${event} - ${filepath}`);
+        generateStepMap(filepath, { outputPath, force: true });
+      }
+    });
+    console.log('👀 Watching for feature changes...');
+  }
+}
+
+module.exports = {
+  processSteps,      // for CLI
+  generateStepMaps   // for programmatic usage
+};
