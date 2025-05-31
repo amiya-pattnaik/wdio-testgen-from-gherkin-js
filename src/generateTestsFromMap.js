@@ -5,7 +5,9 @@ const { generateShortName, buildActionLine } = require('./utils');
 const { stepMapDir, pageObjectDir, specDir, basePagePath } = require('./config');
 
 function ensureBasePageClass(outputDir) {
-  const baseClassPath = path.resolve(outputDir, 'pageobjects/page.js');
+  const baseDir = outputDir || path.resolve(__dirname, '../');
+  const baseClassPath = path.resolve(baseDir, 'pageobjects/page.js');
+
 
   if (!fs.existsSync(baseClassPath)) {
     const content = `const { browser, $ } = require('@wdio/globals');
@@ -62,7 +64,7 @@ function extractPathSegment(stepMap, fallback) {
   return fallback.toLowerCase().replace(/\s+/g, '-');
 }
 
-function generateCodeFromStepMap(file, stepMap, opts = {}) {
+function generateCodeFromStepMap(file, stepMap, opts) {
   const baseName = path.basename(file, '.stepMap.json');
   const pageClassName = `${baseName.charAt(0).toUpperCase()}${baseName.slice(1)}Page`;
   const usedSelectors = new Map();
@@ -112,7 +114,6 @@ function generateCodeFromStepMap(file, stepMap, opts = {}) {
   pageLines.push('  }');
   pageLines.push('}');
   pageLines.push(`module.exports = new ${pageClassName}();`);
-  fs.writeFileSync(path.join(opts.pageObjectDir, `${baseName}.page.js`), pageLines.join('\n'), 'utf-8');
 
   const testLines = [
     `const { expect } = require('@wdio/globals');`,
@@ -135,16 +136,26 @@ function generateCodeFromStepMap(file, stepMap, opts = {}) {
   }
 
   testLines.push('});');
-  fs.writeFileSync(path.join(opts.specDir, `${baseName}.spec.js`), testLines.join('\n'), 'utf-8');
+
+  // === ⚠️ SKIP IF ALREADY EXISTS AND NOT --force ===
+  const pageFilePath = path.join(opts.pageObjectDir, `${baseName}.page.js`);
+  const specFilePath = path.join(opts.specDir, `${baseName}.spec.js`);
+
+  if (!opts.force && fs.existsSync(pageFilePath) && fs.existsSync(specFilePath)) {
+    console.warn(`⚠️ Skipping ${baseName} (test files already exist)`);
+    return;
+  }
 
   if (!opts.dryRun) {
+    fs.writeFileSync(pageFilePath, pageLines.join('\n'), 'utf-8');
+    fs.writeFileSync(specFilePath, testLines.join('\n'), 'utf-8');
     console.log(`✅ Generated: ${baseName}.page.js + ${baseName}.spec.js`);
   } else {
-    console.log(`[dry-run] Would write: ${path.join(opts.pageObjectDir, `${baseName}.page.js`)}`);
-    console.log(`[dry-run] Would write: ${path.join(opts.specDir, `${baseName}.spec.js`)}`);
-
+    console.log(`[dry-run] Would write: ${pageFilePath}`);
+    console.log(`[dry-run] Would write: ${specFilePath}`);
   }
 }
+
 
 function processTests(opts) {
   if (!fs.existsSync(pageObjectDir)) fs.mkdirSync(pageObjectDir, { recursive: true });
@@ -188,9 +199,12 @@ function processTests(opts) {
 }
 
 function generateTestSpecs({ stepMapDir: userDir, outputDir = '', dryRun = false, watch = false }) {
+
   const targetDir = userDir || stepMapDir;
 
   // If outputDir is provided, override defaults
+
+
   const resolvedPageObjectDir = outputDir
     ? path.resolve(outputDir, 'pageobjects')
     : pageObjectDir;
@@ -203,8 +217,8 @@ function generateTestSpecs({ stepMapDir: userDir, outputDir = '', dryRun = false
   if (!fs.existsSync(resolvedPageObjectDir)) fs.mkdirSync(resolvedPageObjectDir, { recursive: true });
   if (!fs.existsSync(resolvedSpecDir)) fs.mkdirSync(resolvedSpecDir, { recursive: true });
 
-  // ensureBasePageClass(); // Generates page.js once if needed
-  ensureBasePageClass(outputDir || path.resolve(__dirname, '../'));
+  ensureBasePageClass(outputDir);; // Generates page.js once if needed
+
 
 
   const files = fs.readdirSync(targetDir).filter(f => f.endsWith('.stepMap.json'));

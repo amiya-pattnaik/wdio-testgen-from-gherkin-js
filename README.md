@@ -6,34 +6,36 @@
 
 # 🤖 wdio-testgen-from-gherkin-js
 
-> CLI tool to generate WebdriverIO Page Objects, utilize AI/NLP for Selector Name, Method Name Inference, and generate Mocha Specs from Gherkin `.feature` files.
+> CLI and Node.js tool to auto-generate WebdriverIO Page Object classes and Mocha test specs from Gherkin `.feature` files using NLP for selector and method inference.
 
-> 🚀. It works in two main steps:
+## 🚀 What It Does
 
-1. Generate Step Maps: Parses Gherkin feature files to produce structured .stepMap.json files which contains - `action`, `selectorName`, `selector`, `fallbackSelector`, `note`.
+1. **Step Map Generation**  
+   Parses `.feature` files into structured `.stepMap.json` with fields like `action`, `selectorName`, `selector`, `fallbackSelector`, and `note`.
 
-2. Generate Tests: Uses the .stepMap.json to generate:
-    - `WebdriverIO-compatible Page Object Model (POM) classes.`
-    - `Mocha-based test specs.`
+2. **Test Code Generation**  
+   Uses step maps to generate:
+   - 🧩 WebdriverIO Page Object Model (POM) classes
+   - 🧪 Mocha test spec files
 
 ---
 
 ## 📦 Installation
 
-Clone the repo and install dependencies:
-
+### Option 1: Clone for local development
 ```bash
+
 git clone https://github.com/amiya-pattnaik/wdio-testgen-from-gherkin-js.git
-
 cd wdio-testgen-from-gherkin-js
-
 npm install
 
 ```
 
-> ✅ If using globally, also install `tsx`:
-```bash
-npm install -g tsx
+### Option 2: Install from NPM
+
+```
+npm install wdio-testgen-from-gherkin-js
+
 ```
 
 ---
@@ -58,15 +60,35 @@ project-root/
 │── wdio.config.js              # WebdriverIO configuration
 ├── package.json                # Scripts and dependencies
 ├── selector-aliases.json       # Optional user-defined selector overrides the primary selector
-
 ```
-
 ---
-
 ## 🚀 CLI Usage
 
-### Option A: Run with npm scripts (easy local use)
+### Option A: Use with npx
 
+```bash
+# Step 1: Generate stepMap.json from the .feature files
+npx testgen steps --all
+npx testgen steps --file login.feature
+
+# Step 2: Generate test code (Page Objects and Mocha Specs) from stepMap.json
+npx testgen tests --all
+npx testgen tests --file login.stepMap.json
+npm run testgen:tests -- --file login.stepMap.json --dry-run
+
+# Step 3: Execute tests and generate Allure reoprt
+npx testgen:run
+npx testgen:run -- --report         # Run tests + generate report
+npx testgen:run -- --report-only    # Just show last test run report
+```
+> Note: npx testgen requires npm link and optional tsx installed globally.
+> This links the CLI executable (bin.testgen) to your system's global path (/usr/local/bin/testgen on macOS/Linux).
+```bash
+npm install -g
+npm link
+```
+
+### Option B: Use with npm scripts
 ```bash
 # Step 1: Generate stepMap.json from the .feature files
 npm run testgen:steps -- --all                 
@@ -77,15 +99,13 @@ npm run testgen:tests -- --all
 npm run testgen:tests -- --file login.stepMap.json
 npm run testgen:tests -- --file login.stepMap.json --dry-run
 
-
 # Step 3: Execute tests and generate Allure reoprt
 npm run testgen:run
 npm run testgen:run -- --report         # Run tests + generate report
 npm run testgen:run -- --report-only    # Just show last test run report
-
 ```
 
-### Option B: Use as a global CLI command
+### Option C: Use as a global CLI command
 
 #### One-time setup:
 ```bash
@@ -93,9 +113,7 @@ npm install -g
 npm install -g tsx         # Required for CLI to run with node shebang
 chmod +x testgen.js        # Make CLI executable (Mac/Linux)
 npm link                   # If fails, try: sudo npm link
-
 ```
-
 #### Now run from anywhere:
 > ⚠️ Requires global tsx installed (npm install -g tsx)
 
@@ -105,17 +123,8 @@ testgen tests --file login.stepMap.json
 testgen run --report        # ⬅️ Runs tests and generate allure report
 testgen run --report-only   # ⬅️ Generate report without rerunning testsbash
 ```
-> 💡 **Note for Allure users:** To avoid errors when opening the report viewer, split the `allure:report` script like this in your package.json:
->
-> ```json
-> "scripts": {
->   "allure:generate": "node_modules/.bin/allure generate --clean allure-results",
->   "allure:open": "allure open -p 5050",
->   "allure:report": "npm run allure:generate && npm run allure:open"
-> }
->```
 
-## Option C: Using as a Node.js Module
+## 📜 Programmatic API Usage
 
 You can use `wdio-testgen-from-gherkin-js` package both as a CLI tool and as a Node.js module in custom scripts.
 
@@ -141,7 +150,6 @@ generateTestSpecs({
   dryRun: false,
   watch: false
 });
-
 ```
 #### Output Structure:
 
@@ -151,13 +159,12 @@ test/
 │   └── login.page.js
 └── specs/
     └── login.spec.js
-
 ```
 ---
 
 ## ⚙️ Available Commands & Flags
 
-### `testgen steps`
+#### `testgen steps`
 | Flag         | Description                              |
 |--------------|------------------------------------------|
 | `--all`      | Parse all feature files                  |
@@ -167,7 +174,7 @@ test/
 |`--dry-run`   | Show files that would be created         |
 | `--force`    | Overwrite existing stepMap files         |
 
-### `testgen tests`
+#### `testgen tests`
 | Flag         | Description                              |
 |--------------|------------------------------------------|
 | `--all`      | Generate tests for all step maps         |
@@ -177,7 +184,7 @@ test/
 | `--dry-run`  | Show files that would be created         |
 | `--force`    | Overwrite existing test files            |
 
-### `testgen run`
+#### `testgen run`
 | Flag           | Description                                      |
 |----------------|--------------------------------------------------|
 | `--report`     | Generate Allure report after test run            |
@@ -233,7 +240,7 @@ Feature: Login
 }
 ```
 
-> <span style="color: red;"> Note: Additionally, ensure that you update the relevant selector for the DOM element of your application under test after generating your JSON file. This will serve as your foundation, and your page objects and test spec files will be constructed based on this data.</span>
+> Note: Additionally, ensure that you update the relevant selector for the DOM element of your application under test after generating your JSON file. This will serve as your foundation, and your page objects and test spec files will be constructed based on this data.
 
 ### Generated: `test/pageobjects/page.js`
 ```js
@@ -324,10 +331,9 @@ describe('login feature tests', () => {
   });
 });
 ```
-> <span style="color: red;"> Note: It is recommended to examine the generated code and implement any required adjustments to meet your needs, such as invoking methods from test spec files to the page class, incorporating reusable methods, renaming selector name, method name (if any) and managing your test data etc.</span>
+> Note: It is recommended to examine the generated code and implement any required adjustments to meet your needs, such as invoking methods from test spec files to the page class, incorporating reusable methods, renaming selector name, method name (if any) and managing your test data etc.
 
 ---
-
 
 ## ✅ Features Implemented
 
@@ -345,7 +351,7 @@ describe('login feature tests', () => {
 - Example:  
   `"When user clicks login"` → `selectorName: "clicklogin"`
 
-### 🧠 3. **Logical Selector Mapping with Fallback Selector**
+### 🧠 3. **Logical Selector + Fallback Selector with priority**
 
 - Applies regex-based matching to map common UI elements to logical names:
   - e.g., `username` → `userNameField`
