@@ -1,10 +1,12 @@
+![npm](https://img.shields.io/npm/v/wdio-testgen-from-gherkin-js)
+![downloads](https://img.shields.io/npm/dm/wdio-testgen-from-gherkin-js)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://webdriver.io/)
 [![Automation Level](https://img.shields.io/badge/automation-100%25-success)](https://webdriver.io/)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.x-green.svg)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Made with ❤️](https://img.shields.io/badge/made%20with-%E2%9D%A4-red)](#)
 
-# 🤖 wdio-testgen-from-gherkin-js
+# 🤖 wdio-testgen-from-gherkin-js (WebdriverIO Test Generator from Gherkin JavaScript)
 
 > CLI and Node.js tool to auto-generate WebdriverIO Page Object classes and Mocha test specs from Gherkin `.feature` files using NLP for selector and method inference.
 
@@ -435,7 +437,16 @@ Supports a wide range of actions: `setValue`, `click`, `selectDropdown`, `upload
 
 ---
 
-🤝 Contributions
-For extension, PRs and suggestions, feel free to fork or connect.
+## 🔗 Related
+- TS version: [`wdio-testgen-from-gherkin-ts`](https://www.npmjs.com/package/wdio-testgen-from-gherkin-ts)
+- TS version: This repo/package
 
-Happy testing! 🚀
+## 📢 Releases and Feedback
+Check out the [Releases](https://github.com/amiya-pattnaik/wdio-testgen-from-gherkin-js/releases) tab for version history and improvements.
+
+Want to discuss features or share feedback? Use [GitHub Discussions](https://github.com/amiya-pattnaik/wdio-testgen-from-gherkin-js/discussions) or open an issue.
+
+## 🧑 Author
+**Amiya Pattanaik**
+
+For issues, enhancements or feature requests, [open an issue](https://github.com/amiya-pattnaik/wdio-testgen-from-gherkin-js/issues).

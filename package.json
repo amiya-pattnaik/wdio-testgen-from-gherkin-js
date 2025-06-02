@@ -22,7 +22,9 @@
     "mocha",
     "webdriverio",
     "automation",
-    "ai-test-generator",
+    "ai test generator",
+    "gherkin",
+    "test generator",
     "cucumber"
   ],
   "repository": {
