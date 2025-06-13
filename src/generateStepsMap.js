@@ -4,10 +4,14 @@ const chokidar = require('chokidar');
 const { Parser, AstBuilder, GherkinClassicTokenMatcher } = require('@cucumber/gherkin');
 const { IdGenerator } = require('@cucumber/messages');
 
-const { featureDir, stepMapDir, selectorAliases, selectorFallbacks } = require('./config');
+const { selectorAliases, selectorFallbacks } = require('./config');
 const { generateShortName, extractQuotedText } = require('./utils');
 
 const parser = new Parser(new AstBuilder(IdGenerator.uuid()), new GherkinClassicTokenMatcher());
+
+// Default folders relative to project root
+const defaultFeaturesPath = path.join(process.cwd(), 'features');
+const defaultOutputPath = path.join(process.cwd(), 'stepMaps');
 
 function toLogicalSelectorName(stepText) {
   const patterns = [
@@ -74,7 +78,7 @@ function inferActionAndSelector(stepText) {
   return { action, selectorName, selector, fallbackSelector, note };
 }
 
-function generateStepMap(featurePath, opts = {}) {
+function generateStepMap(featurePath, outputPath, force) {
   const content = fs.readFileSync(featurePath, 'utf-8');
   const gherkinDocument = parser.parse(content);
   const feature = gherkinDocument.feature;
@@ -93,8 +97,8 @@ function generateStepMap(featurePath, opts = {}) {
     }
   }
 
-  const outPath = path.join(opts.outputPath || stepMapDir, `${featureName}.stepMap.json`);
-  if (!opts.force && fs.existsSync(outPath)) {
+  const outPath = path.join(outputPath, `${featureName}.stepMap.json`);
+  if (!force && fs.existsSync(outPath)) {
     console.warn(`⚠️ Skipping ${featureName} (already exists)`);
     return;
   }
@@ -103,12 +107,16 @@ function generateStepMap(featurePath, opts = {}) {
   console.log(`✅ Generated step map: ${featureName}.stepMap.json`);
 }
 
-// 🔁 CLI-compatible wrapper (no change)
+// CLI-compatible wrapper (still works fine)
 function processSteps(opts) {
-  if (!fs.existsSync(stepMapDir)) fs.mkdirSync(stepMapDir, { recursive: true });
+  const featuresPath = defaultFeaturesPath;
+  const outputPath = defaultOutputPath;
+  const force = opts.force || false;
+
+  if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath, { recursive: true });
 
   const files = opts.all
-    ? fs.readdirSync(featureDir).filter(f => f.endsWith('.feature'))
+    ? fs.readdirSync(featuresPath).filter(f => f.endsWith('.feature'))
     : opts.file || [];
 
   if (!files.length) {
@@ -117,41 +125,41 @@ function processSteps(opts) {
   }
 
   files.forEach(file => {
-    const fullPath = path.join(featureDir, file);
+    const fullPath = path.join(featuresPath, file);
     if (!fs.existsSync(fullPath)) {
       console.warn(`⚠️ File not found: ${file}`);
     } else {
-      generateStepMap(fullPath, { force: opts.force });
+      generateStepMap(fullPath, outputPath, force);
     }
   });
 
   if (opts.watch) {
-    chokidar.watch(featureDir, { ignoreInitial: true }).on('all', (event, filepath) => {
+    chokidar.watch(featuresPath, { ignoreInitial: true }).on('all', (event, filepath) => {
       if (filepath.endsWith('.feature')) {
         console.log(`🔁 Detected change: ${event} - ${filepath}`);
-        generateStepMap(filepath, { force: true });
+        generateStepMap(filepath, outputPath, true);
       }
     });
     console.log('👀 Watching for feature changes...');
   }
 }
 
-// ✅ Programmatic version
-function generateStepMaps({ featuresPath = featureDir, outputPath = stepMapDir, force = true, watch = false }) {
+// ✅ Programmatic entrypoint
+function generateStepMaps({ featuresPath = defaultFeaturesPath, outputPath = defaultOutputPath, force = true, watch = false }) {
   if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath, { recursive: true });
 
   const files = fs.readdirSync(featuresPath).filter(f => f.endsWith('.feature'));
 
   for (const file of files) {
     const fullPath = path.join(featuresPath, file);
-    generateStepMap(fullPath, { outputPath, force });
+    generateStepMap(fullPath, outputPath, force);
   }
 
   if (watch) {
     chokidar.watch(featuresPath, { ignoreInitial: true }).on('all', (event, filepath) => {
       if (filepath.endsWith('.feature')) {
         console.log(`🔁 Detected change: ${event} - ${filepath}`);
-        generateStepMap(filepath, { outputPath, force: true });
+        generateStepMap(filepath, outputPath, true);
       }
     });
     console.log('👀 Watching for feature changes...');
@@ -159,6 +167,6 @@ function generateStepMaps({ featuresPath = featureDir, outputPath = stepMapDir, 
 }
 
 module.exports = {
-  processSteps,      // for CLI
-  generateStepMaps   // for programmatic usage
+  processSteps,
+  generateStepMaps
 };

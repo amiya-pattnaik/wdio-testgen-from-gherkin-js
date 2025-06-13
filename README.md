@@ -4,9 +4,8 @@
 [![Automation Level](https://img.shields.io/badge/automation-100%25-success)](https://webdriver.io/)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.x-green.svg)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Made with ❤️](https://img.shields.io/badge/made%20with-%E2%9D%A4-red)](#)
 
-# 🤖 wdio-testgen-from-gherkin-js (WebdriverIO Test Generator from Gherkin JavaScript)
+# 🤖 `wdio-testgen-from-gherkin-js` (WebdriverIO Test Generator from Gherkin JavaScript)
 
 > CLI and Node.js tool to auto-generate WebdriverIO Page Object classes and Mocha test specs from Gherkin `.feature` files using NLP for selector and method inference.
 
@@ -19,7 +18,6 @@
    Uses step maps to generate:
    - 🧩 WebdriverIO Page Object Model (POM) classes
    - 🧪 Mocha test spec files
-
 ---
 
 ## 📦 Installation
@@ -30,19 +28,16 @@
 git clone https://github.com/amiya-pattnaik/wdio-testgen-from-gherkin-js.git
 cd wdio-testgen-from-gherkin-js
 npm install
-
 ```
 
 ### Option 2: Install from NPM
 
 ```
 npm install wdio-testgen-from-gherkin-js
-
 ```
 
 ---
-
-## 🧭 Directory Structure
+## 🧭 Directory Structure (local development through Option 1)
 
 ```
 project-root/
@@ -93,18 +88,18 @@ npm link
 ### Option B: Use with npm scripts
 ```bash
 # Step 1: Generate stepMap.json from the .feature files
-npm run testgen:steps -- --all                 
-npm run testgen:steps -- --file login.feature
+npm run dev:testgen:steps -- --all                 
+npm run dev:testgen:steps -- --file login.feature
 
 # Step 2: Generate Page Objects and Mocha Specs from stepMap.json
-npm run testgen:tests -- --all
-npm run testgen:tests -- --file login.stepMap.json
-npm run testgen:tests -- --file login.stepMap.json --dry-run
+npm run dev:testgen:tests -- --all
+npm run dev:testgen:tests -- --file login.stepMap.json
+npm run dev:testgen:tests -- --file login.stepMap.json --dry-run
 
 # Step 3: Execute tests and generate Allure reoprt
-npm run testgen:run
-npm run testgen:run -- --report         # Run tests + generate report
-npm run testgen:run -- --report-only    # Just show last test run report
+npm run dev:testgen:run
+npm run dev:testgen:run -- --report         # Run tests + generate report
+npm run dev:testgen:run -- --report-only    # Just show last test run report
 ```
 
 ### Option C: Use as a global CLI command
@@ -126,7 +121,7 @@ testgen run --report        # ⬅️ Runs tests and generate allure report
 testgen run --report-only   # ⬅️ Generate report without rerunning testsbash
 ```
 
-## 📜 Programmatic API Usage
+## 📜 Programmatic API Usage (through Option 2)
 
 You can use `wdio-testgen-from-gherkin-js` package both as a CLI tool and as a Node.js module in custom scripts.
 
@@ -250,7 +245,7 @@ iconst { browser, $ } = require('@wdio/globals');
 
 class Page {
   open(path) {
-    return browser.url(`https://the-internet.herokuapp.com/[object Object]`);
+    return browser.url(`https://the-internet.herokuapp.com/${path}`);
   }
 
   async trySelector(primary, fallbacks) {
@@ -404,7 +399,7 @@ Supports a wide range of actions: `setValue`, `click`, `selectDropdown`, `upload
 
 | Action    | Description |
 | -------- | ------- |
-| setValue         | Sets input value    |
+| setValue        | Sets input value    |
 | click           | Clicks on the element     |
 | hover           | Hovers over an element   |
 | doubleClick     | Performs a double-click    |

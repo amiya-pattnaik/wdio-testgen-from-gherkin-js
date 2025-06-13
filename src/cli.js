@@ -2,8 +2,9 @@
 
 const { Command } = require('commander');
 const { processSteps } = require('./generateStepsMap');
-const { processTests } = require('./generateTestsFromMap');
+const { generateTestSpecs } = require('./generateTestsFromMap');
 const { execSync } = require('child_process');
+const path = require('path');
 
 const program = new Command();
 
@@ -28,7 +29,27 @@ program
   .option('--watch', 'Watch for changes and regenerate')
   .option('--verbose', 'Print detailed logs')
   .option('--dry-run', 'Show files that would be created')
-  .action((opts) => processTests(opts));
+  .action((opts) => {
+    const stepMapDir = path.resolve('stepMaps');
+    const outputDir = path.resolve('test');
+
+    // Prepare parameters for generateTestSpecs
+    const files = opts.all ? null : (opts.file || []);
+    const force = opts.force || false;
+    const dryRun = opts.dryRun || false;
+    const watch = opts.watch || false;
+    const verbose = opts.verbose || false;
+
+    generateTestSpecs({
+      stepMapDir: stepMapDir,
+      outputDir: outputDir,
+      file: files,
+      force,
+      dryRun,
+      watch,
+      verbose
+    });
+  });
 
 program
   .command('run')

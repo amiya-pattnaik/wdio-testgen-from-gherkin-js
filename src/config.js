@@ -1,9 +1,11 @@
-// Paths, fallback selectors, aliases
+// // Paths, fallback selectors, aliases
+
 
 const fs = require('fs');
 const path = require('path');
 
-const rootDir = __dirname.includes('src') ? path.resolve(__dirname, '..') : __dirname;
+// Always resolve relative to where user is calling from
+const rootDir = process.cwd();
 
 const featureDir = path.join(rootDir, 'features');
 const stepMapDir = path.join(rootDir, 'stepMaps');
@@ -31,6 +33,7 @@ const selectorFallbacks = {
 };
 
 module.exports = {
+  rootDir,           // <-- I suggest exposing this too
   featureDir,
   stepMapDir,
   testDir,

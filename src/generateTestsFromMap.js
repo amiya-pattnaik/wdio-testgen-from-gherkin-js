@@ -1,15 +1,24 @@
+// generateTestsFromMap.js
+
 const fs = require('fs');
 const path = require('path');
 const chokidar = require('chokidar');
+const nlp = require('compromise');
 const { generateShortName, buildActionLine } = require('./utils');
-const { stepMapDir, pageObjectDir, specDir, basePagePath } = require('./config');
+const config = require('./config');
 
-function ensureBasePageClass(outputDir) {
-  const baseDir = outputDir || path.resolve(__dirname, '../');
-  const baseClassPath = path.resolve(baseDir, 'pageobjects/page.js');
+// Full path resolution based on whether outputDir provided
+function resolvePaths(outputDir) {
+  const base = outputDir ? path.resolve(process.cwd(), outputDir) : config.testDir;
+  return {
+    pageObjectDir: path.join(base, 'pageobjects'),
+    specDir: path.join(base, 'specs'),
+    basePagePath: path.join(base, 'pageobjects', 'page.js'),
+  };
+}
 
-
-  if (!fs.existsSync(baseClassPath)) {
+function ensureBasePageClass(basePagePath) {
+  if (!fs.existsSync(basePagePath)) {
     const content = `const { browser, $ } = require('@wdio/globals');
 
 class Page {
@@ -41,19 +50,17 @@ class Page {
 }
 
 module.exports = Page;`;
-
-    fs.mkdirSync(path.dirname(baseClassPath), { recursive: true });
-    fs.writeFileSync(baseClassPath, content, 'utf-8');
+    fs.mkdirSync(path.dirname(basePagePath), { recursive: true });
+    fs.writeFileSync(basePagePath, content, 'utf-8');
     console.log('✅ Created base Page class with open() and trySelector()');
   }
 }
-
 
 function extractPathSegment(stepMap, fallback) {
   for (const steps of Object.values(stepMap)) {
     for (const step of steps) {
       if (/navigate|go to|open/i.test(step.note || '')) {
-        const doc = require('compromise')(step.note);
+        const doc = nlp(step.note);
         const nouns = doc.nouns().out('array');
         if (nouns.length > 0) {
           return nouns[0].toLowerCase().replace(/\s+/g, '-');
@@ -156,101 +163,26 @@ function generateCodeFromStepMap(file, stepMap, opts) {
   }
 }
 
+// Programmatic API entry point
+function generateTestSpecs({ stepMapDir = config.stepMapDir, outputDir = '', dryRun = false, force = true, watch = false }) {
+  const resolvedPaths = resolvePaths(outputDir);
+  if (!fs.existsSync(resolvedPaths.pageObjectDir)) fs.mkdirSync(resolvedPaths.pageObjectDir, { recursive: true });
+  if (!fs.existsSync(resolvedPaths.specDir)) fs.mkdirSync(resolvedPaths.specDir, { recursive: true });
+  ensureBasePageClass(resolvedPaths.basePagePath);
 
-function processTests(opts) {
-  if (!fs.existsSync(pageObjectDir)) fs.mkdirSync(pageObjectDir, { recursive: true });
-  if (!fs.existsSync(specDir)) fs.mkdirSync(specDir, { recursive: true });
-
-  ensureBasePageClass();
-
-  const files = opts.all
-    ? fs.readdirSync(stepMapDir).filter(f => f.endsWith('.stepMap.json'))
-    : opts.file || [];
-
-  if (!files.length) {
-    console.error('❌ Please provide --all or --file <file>');
-    process.exit(1);
-  }
-
-  files.forEach(file => {
-    const fullPath = path.join(stepMapDir, file);
-    if (!fs.existsSync(fullPath)) {
-      console.warn(`⚠️ Step map not found: ${file}`);
-      return;
-    }
-    const stepMap = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
-    generateCodeFromStepMap(file, stepMap, {
-      ...opts,
-      pageObjectDir,
-      specDir
-    });
-
-  });
-
-  if (opts.watch) {
-    chokidar.watch(stepMapDir, { ignoreInitial: true }).on('all', (event, filepath) => {
-      if (filepath.endsWith('.stepMap.json')) {
-        console.log(`🔁 Detected change: ${event} - ${filepath}`);
-        processTests({ ...opts, file: [path.basename(filepath)] });
-      }
-    });
-    console.log('👀 Watching for step map changes...');
-  }
-}
-
-function generateTestSpecs({ stepMapDir: userDir, outputDir = '', dryRun = false, watch = false }) {
-
-  const targetDir = userDir || stepMapDir;
-
-  // If outputDir is provided, override defaults
-
-
-  const resolvedPageObjectDir = outputDir
-    ? path.resolve(outputDir, 'pageobjects')
-    : pageObjectDir;
-
-  const resolvedSpecDir = outputDir
-    ? path.resolve(outputDir, 'specs')
-    : specDir;
-
-  // Ensure folders
-  if (!fs.existsSync(resolvedPageObjectDir)) fs.mkdirSync(resolvedPageObjectDir, { recursive: true });
-  if (!fs.existsSync(resolvedSpecDir)) fs.mkdirSync(resolvedSpecDir, { recursive: true });
-
-  ensureBasePageClass(outputDir);; // Generates page.js once if needed
-
-
-
-  const files = fs.readdirSync(targetDir).filter(f => f.endsWith('.stepMap.json'));
-
+  const files = fs.readdirSync(stepMapDir).filter(f => f.endsWith('.stepMap.json'));
   for (const file of files) {
-    const fullPath = path.join(targetDir, file);
+    const fullPath = path.join(stepMapDir, file);
     const stepMap = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
-
     generateCodeFromStepMap(file, stepMap, {
+      pageObjectDir: resolvedPaths.pageObjectDir,
+      specDir: resolvedPaths.specDir,
       dryRun,
-      pageObjectDir: resolvedPageObjectDir,
-      specDir: resolvedSpecDir
+      force
     });
-  }
-
-  if (watch) {
-    chokidar.watch(targetDir, { ignoreInitial: true }).on('all', (event, filepath) => {
-      if (filepath.endsWith('.stepMap.json')) {
-        const stepMap = JSON.parse(fs.readFileSync(filepath, 'utf-8'));
-        generateCodeFromStepMap(path.basename(filepath), stepMap, {
-          dryRun,
-          pageObjectDir: resolvedPageObjectDir,
-          specDir: resolvedSpecDir
-        });
-      }
-    });
-    console.log('👀 Watching for step map changes...');
   }
 }
 
+// CLI version remains untouched (optional if you have CLI)
 
-module.exports = {
-  processTests,        // CLI use
-  generateTestSpecs    // Programmatic use
-};
+module.exports = { generateTestSpecs };

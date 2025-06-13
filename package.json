@@ -10,12 +10,8 @@
     "testgen": "testgen.js"
   },
   "files": [
-    "testgen.js",
     "index.js",
     "src/",
-    "features/",
-    "babel.config.js",
-    "wdio.conf.js",
     "README.md"
   ],
   "keywords": [
