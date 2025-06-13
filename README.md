@@ -147,6 +147,8 @@ generateTestSpecs({
   dryRun: false,
   watch: false
 });
+
+NOTE: If you don't mention the stepMapDir path then stepMaps and test folder will be created under your project root directory.
 ```
 #### Output Structure:
 
