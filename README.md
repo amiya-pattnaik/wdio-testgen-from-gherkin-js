@@ -103,7 +103,7 @@ npm run dev:testgen:run -- --report-only    # Just show last test run report
 ```
 
 
-## 📜 Programmatic API Usage (through Option 2)
+## 📜 Programmatic API Usage (through NPM package)
 
 You can use `wdio-testgen-from-gherkin-js` package both as a CLI tool and as a Node.js module in custom scripts.
 
@@ -225,7 +225,7 @@ Feature: Login
 
 ### Generated: `test/pageobjects/page.js`
 ```js
-iconst { browser, $ } = require('@wdio/globals');
+const { browser, $ } = require('@wdio/globals');
 
 class Page {
   open(path) {
@@ -260,55 +260,46 @@ module.exports = Page;
 
 ### Generated: `test/pageobjects/login.page.js`
 ```js
-import Page from './page';
-
+const Page = require('./page');
 class LoginPage extends Page {
-  get userNameField() {
-    return this.trySelector('[data-testid="userNameField"]', ['#username', 'input[name="username"]']);
+  get loginbutton() {
+    return this.trySelector('button.login-btn', ['#login', 'button[type="submit"]']);
   }
-
-  get passwordField() {
-    return this.trySelector('[data-testid="passwordField"]', ['#password', 'input[type="password"]']);
+  get usernamefield() {
+    return this.trySelector('#login-username-amiya', ['#username', 'input[name="username"]']);
   }
-
-  get loginButton() {
-    return this.trySelector('[data-testid="loginButton"]', ['#login', 'button[type="submit"]']);
+  get passwordfield() {
+    return this.trySelector('#login-password-Patt', ['#password', 'input[type="password"]']);
   }
-
-  get dashboard() {
-    return this.trySelector('[data-testid="dashboard"]', []);
+  get welcomebanner() {
+    return this.trySelector('[data-testid="welcomeBanner"]', ['#welcome-message', '.welcome']);
   }
-
-  async successfulLogin() {
-    await (await this.userNameField).setValue('admin');
-    await (await this.passwordField).setValue('adminpass');
-    await (await this.loginButton).click();
-    await expect(await this.dashboard).toBeDisplayed();
+  async mySuccessfulLogin() {
+    await (await this.usernamefield).setValue('');
+    await (await this.passwordfield).setValue('');
+    await (await this.loginbutton).click();
+    await expect(await this.welcomebanner).toBeDisplayed();
   }
-
-  open(pathSegment: string = 'login') {
+  open(pathSegment = 'login') {
     return super.open(pathSegment);
   }
 }
-
-export default new LoginPage();
+module.exports = new LoginPage();
 ```
 
 ### Generated: `test/specs/login.spec.js`
 ```js
-import { expect } from '@wdio/globals';
-import LoginPage from '../pageobjects/login.page';
-
+const { expect } = require('@wdio/globals');
+const LoginPage = require('../pageobjects/login.page');
 describe('login feature tests', () => {
-  it('successfulLogin', async () => {
+  it('mySuccessfulLogin', async () => {
     await LoginPage.open();
-    await (await LoginPage.userNameField).setValue('admin');
-    await (await LoginPage.passwordField).setValue('adminpass');
-    await (await LoginPage.loginButton).click();
-    await expect(await LoginPage.dashboard).toBeDisplayed();
-
+    await (await LoginPage.usernamefield).setValue('');
+    await (await LoginPage.passwordfield).setValue('');
+    await (await LoginPage.loginbutton).click();
+    await expect(await LoginPage.welcomebanner).toBeDisplayed();
     // Or simply use:
-    // await LoginPage.successfulLogin();
+    // await LoginPage.mySuccessfulLogin();
   });
 });
 ```
