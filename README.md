@@ -61,31 +61,31 @@ project-root/
 ---
 ## 🚀 CLI Usage
 
-### Option A: Use with npx
+### 🔹 Option A: # One-time setup
 
-```bash
-# Step 1: Generate stepMap.json from the .feature files
-npx testgen steps --all
-npx testgen steps --file login.feature
-
-# Step 2: Generate test code (Page Objects and Mocha Specs) from stepMap.json
-npx testgen tests --all
-npx testgen tests --file login.stepMap.json
-npm run testgen:tests -- --file login.stepMap.json --dry-run
-
-# Step 3: Execute tests and generate Allure reoprt
-npx testgen:run
-npx testgen:run -- --report         # Run tests + generate report
-npx testgen:run -- --report-only    # Just show last test run report
-```
-> Note: npx testgen requires npm link and optional tsx installed globally.
-> This links the CLI executable (bin.testgen) to your system's global path (/usr/local/bin/testgen on macOS/Linux).
 ```bash
 npm install -g
-npm link
+npm install -g tsx          # Required for CLI to run with node shebang
+chmod +x testgen.js         # Make CLI executable (Mac/Linux)
+npm link                    # If fails, try: sudo npm link
+
+⚠️ Now run from anywhere
+
+# Step 1: Generate stepMap.json from the .feature files
+testgen steps --all
+testgen steps --file login.feature
+
+# Step 2: Generate test code (Page Objects and Mocha Specs) from stepMap.json
+testgen tests --all
+testgen tests --file login.stepMap.json
+testgen tests --file login.stepMap.json --dry-run
+
+# Step 3: Execute tests and generate Allure report
+testgen run --report        # ⬅️ Runs tests and generate allure report
+testgen run --report-only   # ⬅️ Generate report without rerunning testsbash
 ```
 
-### Option B: Use with npm scripts
+### 🔹 Option B: Local development (without global install)
 ```bash
 # Step 1: Generate stepMap.json from the .feature files
 npm run dev:testgen:steps -- --all                 
@@ -102,24 +102,6 @@ npm run dev:testgen:run -- --report         # Run tests + generate report
 npm run dev:testgen:run -- --report-only    # Just show last test run report
 ```
 
-### Option C: Use as a global CLI command
-
-#### One-time setup:
-```bash
-npm install -g
-npm install -g tsx         # Required for CLI to run with node shebang
-chmod +x testgen.js        # Make CLI executable (Mac/Linux)
-npm link                   # If fails, try: sudo npm link
-```
-#### Now run from anywhere:
-> ⚠️ Requires global tsx installed (npm install -g tsx)
-
-```bash
-testgen steps --all
-testgen tests --file login.stepMap.json
-testgen run --report        # ⬅️ Runs tests and generate allure report
-testgen run --report-only   # ⬅️ Generate report without rerunning testsbash
-```
 
 ## 📜 Programmatic API Usage (through Option 2)
 
